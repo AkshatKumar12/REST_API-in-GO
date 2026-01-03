@@ -13,6 +13,7 @@ import (
 
 	"github.com/AkshatKumar12/Rest_API-IN-GO/internal/config"
 	"github.com/AkshatKumar12/Rest_API-IN-GO/internal/config/http/handlers/student"
+	"github.com/AkshatKumar12/Rest_API-IN-GO/internal/config/storage/sqlite"
 )
 
 func main() {
@@ -27,6 +28,16 @@ func main() {
 	// ------------------------------------------- 1. load config----------------------------------------
 	
 	cfg:= config.MustLoad()
+	// ------------------------------------------- 2. Database----------------------------------------
+
+	_,err := sqlite.New(cfg)
+
+	if err != nil{
+		log.Fatal(err)
+	}
+	slog.Info("Storage initialized",slog.String("env",cfg.Env),slog.String("version","1.0.0"))
+
+
 	
 	// ------------------------------------------- 3. setup router----------------------------------------
 
@@ -60,7 +71,7 @@ func main() {
 	ctx,cancel := context.WithTimeout(context.Background(),5 * time.Second)		// context.background is an empty context
 	defer cancel()
 
-	err := server.Shutdown(ctx)
+	err = server.Shutdown(ctx)
 
 	if err != nil{
 		slog.Error("failed to shut-down server",slog.String("error",err.Error()))
