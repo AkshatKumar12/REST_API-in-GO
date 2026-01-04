@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/AkshatKumar12/Rest_API-IN-GO/internal/config/storage"
 	"github.com/AkshatKumar12/Rest_API-IN-GO/internal/config/types"
@@ -60,3 +61,27 @@ func New(storage storage.Storage) http.HandlerFunc {
 	}
 }
 
+
+
+func GetById(storage storage.Storage) http.HandlerFunc{
+	return func(w http.ResponseWriter, r *http.Request) {
+		id:= r.PathValue("id")		// same name that we gave to the router
+		slog.Info("Gettting a student",slog.String("id",id))
+
+		intID,err := strconv.ParseInt(id,10,64)
+
+		if err != nil{
+			response.WriteJSON(w,http.StatusBadRequest,response.GeneralError(err))
+			return
+		}
+		student,e := storage.GetStudentById(intID)
+
+		if e != nil{
+			slog.Error("error Getting user",slog.String("id",id))
+			response.WriteJSON(w,http.StatusInternalServerError,response.GeneralError(e))
+			return
+		}
+		response.WriteJSON(w,http.StatusOK,student)
+
+	}
+}
