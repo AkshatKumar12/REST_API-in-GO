@@ -34,3 +34,21 @@ func New(cfg *config.Config)(*SqLite,error){
 		Db: db,
 	},nil
 }
+
+func (s *SqLite)CreateStudent(name string, email string, age int)(int64, error){
+	
+	stat, err := s.Db.Prepare("INSERT INTO students (name,email,age) VALUES(?,?,?)")
+
+	if err != nil{
+		return 0,err
+	}
+	defer stat.Close()
+
+	result,err := stat.Exec(name,email,age)
+	lastid,err := result.LastInsertId()		// returns the last affected cell
+	if err != nil{
+		return 0,err					// return empty value
+	}
+
+	return lastid,nil
+}
